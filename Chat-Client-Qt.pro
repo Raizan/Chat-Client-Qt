@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     publicchat.cpp \
     privatechat.cpp \
     connection.cpp \
-    chattextbox.cpp
+    chattextbox.cpp \
+    rc4algorithm.cpp
 
 HEADERS  += connectwindow.h \
     publicchat.h \
     privatechat.h \
     connection.h \
-    chattextbox.h
+    chattextbox.h \
+    rc4algorithm.h
 
 FORMS    += connectwindow.ui \
     publicchat.ui \
