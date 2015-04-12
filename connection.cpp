@@ -3,7 +3,7 @@
 #include "privatechat.h"
 #include <QMessageBox>
 #include <QDebug>
-
+#include <iostream>
 Connection::Connection(int refreshRate_msec, QObject *parent) : QObject(parent)
 {
     timer.setInterval(refreshRate_msec);
@@ -50,7 +50,11 @@ void Connection::disconnected(){
 }
 
 void Connection::outgoingPublicMessage(QString messageContent){
-    QString message("Mode: Public\r\n" + messageContent + "\r\n.\r\n");
+    PublicChat* thePublic = (PublicChat*)parent();
+    RC4Algorithm *rc4 = thePublic->getRC4();
+    QString encryptedContent= rc4->crypt(messageContent);
+    qDebug() << encryptedContent;
+    QString message("Mode: Public\r\n" + encryptedContent + "\r\n.\r\n");
     socket->write(message.toUtf8());
 }
 
@@ -66,7 +70,11 @@ void Connection::incomingMessage(){
             //'User: '/
             QString newString = stringList.at(1);
             newString.remove(0, 6);
-            PublicWindow->addMessage(newString, stringList.at(2));
+            PublicChat* thePublic = (PublicChat*)parent();
+            qDebug() << stringList.at(2);
+            RC4Algorithm *rc4 = thePublic->getRC4();
+            QString mesg = rc4->crypt(stringList.at(2));
+            PublicWindow->addMessage(newString, mesg);
         }
         else if(stringList.at(0) == "Mode: Private"){
             //Check private window

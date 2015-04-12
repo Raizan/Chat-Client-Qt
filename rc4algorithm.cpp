@@ -1,4 +1,5 @@
 #include "rc4algorithm.h"
+#include <QDebug>
 RC4Algorithm::RC4Algorithm(string key)
 {
     for (int i=0; i<256; i++){
@@ -6,8 +7,6 @@ RC4Algorithm::RC4Algorithm(string key)
         T[i]=key[i% key.length()];
     }
     initPermutation();
-    this->i=0;
-    this->j=0;
 }
 
 RC4Algorithm::~RC4Algorithm()
@@ -23,30 +22,27 @@ void RC4Algorithm::initPermutation()
     }
 }
 
-unsigned char RC4Algorithm::genKey()
+unsigned char RC4Algorithm::genKey(unsigned char* tempS)
 {
-    i = (i+1) % 256;
-    j = (j+S[i]) % 256;
-    swap(S[i],S[j]);
-    int t = (S[i] + S[j]) % 256;
-    return S[t];
+    iter1 = (iter1+1) % 256;
+    iter2 = (iter2+tempS[iter1]) % 256;
+    swap(tempS[iter1],tempS[iter2]);
+    int t = (tempS[iter1] + tempS[iter2]) % 256;
+    return tempS[t];
 }
 
-string RC4Algorithm::encrpyt(string plaintext)
-{
-    string ciphertext;
-    for(unsigned int i=0;i<plaintext.length();i++){
-          ciphertext[i] = genKey() ^ plaintext[i];
-    }
-    return ciphertext;
-}
 
-string RC4Algorithm::decrypt(string ciphertext)
+QString RC4Algorithm::crypt(QString beforeText)
 {
-    string plaintext;
-    for(unsigned int i=0;i<ciphertext.length();i++){
-        plaintext[i] = genKey() ^ ciphertext[i];
+    qDebug() << beforeText.length();
+    iter1=0;iter2=0;
+    QString afterText;
+    unsigned char tempS[256];
+    copy(S,S+sizeof(S),tempS);
+    for(int i=0;i<beforeText.length();i++){
+          afterText += genKey(tempS) ^ beforeText[i].toLatin1();
     }
-    return plaintext;
+     qDebug() << afterText.length();
+    return afterText;
 }
 
