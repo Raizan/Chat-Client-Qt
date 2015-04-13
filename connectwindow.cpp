@@ -40,6 +40,7 @@ void ConnectWindow::ConnectToHost(){
         PublicChat* mainWindow = new PublicChat();
         mainWindow->setUsername(name);
         Connection* theConnection = new Connection(1000, mainWindow);
+        theConnection->setServerKeyPair(this->CA, strlen(this->CA));
         if(!theConnection->connectToHost(IP, port, name)){
             delete mainWindow;
 //            delete theConnection;
@@ -49,8 +50,6 @@ void ConnectWindow::ConnectToHost(){
             alert.exec();
         }
         else{
-            theConnection->InitRSA();
-            theConnection->setServerKeyPair(this->CA, strlen(this->CA));
             mainWindow->show();
             theConnection->checkUserList();
             connect(mainWindow, SIGNAL(newPrivateWindow(QObject*)), theConnection, SLOT(newPrivateWindow(QObject*)));

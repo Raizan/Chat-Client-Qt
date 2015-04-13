@@ -10,6 +10,7 @@
 Connection::Connection(int refreshRate_msec, QObject *parent) : QObject(parent)
 {
     timer.setInterval(refreshRate_msec);
+    this->InitRSA();
     connect(&timer, SIGNAL(timeout()), this, SLOT(checkUserList()));
     isApplicationRunning = false;
 }
@@ -31,6 +32,25 @@ bool Connection::connectToHost(QString IP, quint16 Port, QString Username){
         connect(thePublic, SIGNAL(sendMessage(QString)), this, SLOT(outgoingPublicMessage(QString)));
         isApplicationRunning = true;
         socket->write("Mode: Username\r\n" + Username.toUtf8() + "\r\n.\r\n");
+        // Sending Public key to the server
+        size_t pub_len;
+        char* pub_key;
+        BIO* pub = BIO_new(BIO_s_mem());
+        PEM_write_bio_RSAPublicKey(pub, keypair);
+        pub_len = BIO_pending(pub);
+        pub_key = (char*) malloc(pub_len + 1);
+        BIO_read(pub, pub_key, pub_len);
+        pub_key[pub_len] = '\0';
+        char* encrypt = (char*) malloc(4096);
+        int encrypt_len = RSA_public_encrypt(pub_len, (unsigned char*)pub_key, (unsigned char*)encrypt, ServKey, RSA_PKCS1_OAEP_PADDING);
+        encrypt[encrypt_len] = '\0';
+        QString setPub("Mode: SetPubKey\r\n" + QString::fromUtf8(encrypt, encrypt_len) + "\r\n.\r\n");
+        socket->write(setPub.toUtf8());
+        free(encrypt);
+        free(pub_key);
+        BIO_free_all(pub);
+        //
+
         timer.start();
         return true;
     }
