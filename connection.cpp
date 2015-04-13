@@ -4,6 +4,9 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <iostream>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+
 Connection::Connection(int refreshRate_msec, QObject *parent) : QObject(parent)
 {
     timer.setInterval(refreshRate_msec);
@@ -125,5 +128,19 @@ void Connection::checkUserList(){
 void Connection::newPrivateWindow(QObject *privateWindow){
     //Add signal listener to the new window
     PrivateChat* privateChat = (PrivateChat*)privateWindow;
+    // TODO : Distribute key with another client
     connect(privateChat, SIGNAL(sendMessage(QString,QString)), this, SLOT(outgoingPrivateMessage(QString,QString)));
+}
+
+void Connection::setServerKeyPair(char *key, size_t key_len){
+    BIO* bufio;
+    bufio = BIO_new_mem_buf((void*)key, key_len);
+    PEM_read_bio_RSAPublicKey(bufio, &ServKey, NULL, NULL);
+}
+
+int Connection::InitRSA(){
+    BIGNUM *bne = BN_new();
+    BN_set_word(bne, RSA_F4);
+    int r = RSA_generate_key_ex(keypair, 1024, bne, NULL);
+    return r;
 }

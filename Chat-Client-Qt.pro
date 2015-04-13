@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Chat-Client-Qt
 TEMPLATE = app
 CONFIG += c++11
-
+LIBS += -lcrypto
 
 SOURCES += main.cpp\
         connectwindow.cpp \

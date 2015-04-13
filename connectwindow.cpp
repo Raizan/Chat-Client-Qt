@@ -49,6 +49,8 @@ void ConnectWindow::ConnectToHost(){
             alert.exec();
         }
         else{
+            theConnection->InitRSA();
+            theConnection->setServerKeyPair(this->CA, strlen(this->CA));
             mainWindow->show();
             theConnection->checkUserList();
             connect(mainWindow, SIGNAL(newPrivateWindow(QObject*)), theConnection, SLOT(newPrivateWindow(QObject*)));
